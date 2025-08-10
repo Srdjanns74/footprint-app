@@ -26,6 +26,9 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      # Ako koristiš local.properties za SDK putanju/ključeve, CI ga nema – nije ni potreban za običan build.
+      # Bitno je da app može da se izgradi bez pozivanja spoljnjih API-ja.
+
       - name: Build (assembleDebug)
         run: ./gradlew assembleDebug --stacktrace
 
@@ -34,3 +37,4 @@ jobs:
 
       - name: Unit tests
         run: ./gradlew test
+
