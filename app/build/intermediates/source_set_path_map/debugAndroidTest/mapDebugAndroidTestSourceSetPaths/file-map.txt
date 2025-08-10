@@ -1,6 +1,0 @@
-com.example.footprint.test.app-jetified-core-1.5.0-0 C:\Users\amd\.gradle\caches\8.13\transforms\ddd5f412980e64e10f40eeda84ca280d\transformed\jetified-core-1.5.0\res
-com.example.footprint.test.app-jetified-annotation-experimental-1.4.0-1 C:\Users\amd\.gradle\caches\8.13\transforms\eca13802148ec66ec072b19f428f2610\transformed\jetified-annotation-experimental-1.4.0\res
-com.example.footprint.test.app-androidTest-2 C:\Users\amd\Documents\GitHub\footprint-app\app\build\generated\res\resValues\androidTest\debug
-com.example.footprint.test.app-mergeDebugAndroidTestResources-3 C:\Users\amd\Documents\GitHub\footprint-app\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
-com.example.footprint.test.app-mergeDebugAndroidTestResources-4 C:\Users\amd\Documents\GitHub\footprint-app\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
-com.example.footprint.test.app-debugAndroidTest-5 C:\Users\amd\Documents\GitHub\footprint-app\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources
