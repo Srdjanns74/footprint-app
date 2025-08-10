@@ -1,0 +1,10 @@
+diff --git a/README.md b/README.md
+index e69de29..fc5b1a2 100644
+--- a/README.md
++++ b/README.md
+@@ -0,0 +1,5 @@
++# FootPrint
++
++Ovo je test patch dodat preko GitHub integracije.
++
++Ako vidiš ovaj tekst na GitHub-u, patch sistem radi ispravno.
