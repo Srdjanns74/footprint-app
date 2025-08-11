@@ -1,14 +1,25 @@
-name: Android CI
+name: Android CI (FootPrint Debug)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master", "develop" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "master", "develop" ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      # Ako koristiš API ključeve (Mapbox/Google), stavi ih u GitHub Secrets i mapiraj ovde:
+      MAPBOX_PUBLIC_TOKEN: ${{ secrets.MAPBOX_PUBLIC_TOKEN }}
+      MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
+      GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+
+      # Pomoćne promenljive
+      JAVA_TOOL_OPTIONS: -Xmx2g
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2g -Dfile.encoding=UTF-8"
 
     steps:
       - name: Checkout
@@ -18,23 +29,50 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: "17"
+          cache: gradle
 
-      - name: Gradle cache
-        uses: gradle/actions/setup-gradle@v3
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          # Prilagodi prema projektu (API 34 je tipično ok)
+          api-level: 34
+          build-tools: "34.0.0"
+          ndk: ""
+          cmake: ""
 
-      - name: Make gradlew executable
+      - name: Ensure Gradlew is executable
         run: chmod +x ./gradlew
 
-      # Ako koristiš local.properties za SDK putanju/ključeve, CI ga nema – nije ni potreban za običan build.
-      # Bitno je da app može da se izgradi bez pozivanja spoljnjih API-ja.
+      # Ako build/plugini ili tvoj kod očekuju local.properties (čak i kada nije neophodno),
+      # napravi ga ovde i veži na ANDROID_SDK_ROOT koji postavlja setup-android.
+      - name: Create local.properties (sdk.dir)
+        run: |
+          echo "sdk.dir=${ANDROID_SDK_ROOT}" > local.properties
 
-      - name: Build (assembleDebug)
-        run: ./gradlew assembleDebug --stacktrace
+      # Ako želiš da ubaciš API ključeve u gradle.properties (preporučeno):
+      - name: Inject secrets into Gradle properties
+        run: |
+          mkdir -p ~/.gradle
+          {
+            echo "MAPBOX_PUBLIC_TOKEN=${MAPBOX_PUBLIC_TOKEN}"
+            echo "MAPBOX_DOWNLOADS_TOKEN=${MAPBOX_DOWNLOADS_TOKEN}"
+            echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}"
+          } >> ~/.gradle/gradle.properties
 
-      - name: Lint
-        run: ./gradlew lint
+      - name: Dependencies
+        run: ./gradlew --stacktrace --info --warning-mode=all dependencies
 
-      - name: Unit tests
-        run: ./gradlew test
+      - name: Build Debug
+        run: ./gradlew --stacktrace --info --warning-mode=all clean assembleDebug
 
+      - name: Run unit tests
+        run: ./gradlew --stacktrace --info testDebugUnitTest
+
+      # Upload APK artefakt da ga odmah možeš skinuti
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FootPrint-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
