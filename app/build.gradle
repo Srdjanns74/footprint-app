@@ -16,25 +16,28 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        // ▼▼▼ DODATO: placeholders i BuildConfig polja za ključeve ▼▼▼
-        // GOOGLE_MAPS_API_KEY će stići iz GitHub Secrets ili ~/.gradle/gradle.properties
+        // ▼▼▼ KLJUČEVI IZ OKRUŽENJA/SECRETS ▼▼▼
+        // Google Maps (ide kroz Manifest placeholder)
         manifestPlaceholders = [
             GOOGLE_MAPS_API_KEY: System.getenv("GOOGLE_MAPS_API_KEY") ?: (project.findProperty("GOOGLE_MAPS_API_KEY") ?: "")
         ]
-        // Ako koristiš Mapbox token u kodu: BuildConfig.MAPBOX_PUBLIC_TOKEN
+        // OpenRouter API key (čitamo ga kao BuildConfig.OPENROUTER_API_KEY)
+        buildConfigField "String", "OPENROUTER_API_KEY",
+                "\"${ System.getenv("OPENROUTER_API_KEY") ?: (project.findProperty("OPENROUTER_API_KEY") ?: "") }\""
+        // (opciono) Mapbox token
         buildConfigField "String", "MAPBOX_PUBLIC_TOKEN",
                 "\"${ System.getenv("MAPBOX_PUBLIC_TOKEN") ?: (project.findProperty("MAPBOX_PUBLIC_TOKEN") ?: "") }\""
-        // ▲▲▲ KRAJ dodatka ▲▲▲
+        // ▲▲▲ KRAJ KLJUČEVA ▲▲▲
     }
 
     buildTypes {
         release {
-            // može ostati false za sad (za Play Store ćemo kasnije)
+            // Za Play kasnije uključujemo minify/shrink; za sada neka je false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            // može ostati prazan; služi samo za debug build
+            // debug specifično po potrebi
         }
     }
 
@@ -55,7 +58,14 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.24"
 
-    // Dodaj ovde svoje postojeće zavisnosti (maps, play-services-maps, itd) ako već nisi.
-    // primer:
-    // implementation "com.google.android.gms:play-services-maps:18.2.0"
+    // Google Maps (primer – koristi ako imaš mape)
+    implementation "com.google.android.gms:play-services-maps:18.2.0"
+
+    // Retrofit + Gson + OkHttp (za OpenRouter ili druge API-je)
+    implementation "com.squareup.retrofit2:retrofit:2.11.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.11.0"
+    implementation "com.squareup.okhttp3:okhttp:4.12.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.12.0"
+
+    // (po potrebi dodaj ostale tvoje zavisnosti)
 }
