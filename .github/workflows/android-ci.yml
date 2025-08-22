@@ -10,8 +10,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     env:
-      # Ako ih koristiš, dodaćemo ih kao Secrets u Settings → Secrets → Actions
+      # Ove 3 promenljive će doći iz GitHub Secrets (dodaćeš u sledećem koraku)
       GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
       MAPBOX_PUBLIC_TOKEN: ${{ secrets.MAPBOX_PUBLIC_TOKEN }}
       MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
@@ -39,11 +40,11 @@ jobs:
       - name: Ensure Gradlew is executable
         run: chmod +x ./gradlew
 
-      # rešava "SDK location not found" bez komitovanja local.properties
+      # Rešava "SDK location not found" bez commita local.properties
       - name: Create local.properties (sdk.dir)
         run: echo "sdk.dir=${ANDROID_SDK_ROOT}" > local.properties
 
-      # ubaci Secrets u ~/.gradle/gradle.properties da ih Gradle vidi kao project properties
+      # Ubacujemo tajne u ~/.gradle/gradle.properties (Gradle ih ovde vidi kao project properties)
       - name: Inject secrets into Gradle properties
         run: |
           mkdir -p ~/.gradle
@@ -59,7 +60,7 @@ jobs:
       - name: Build Debug
         run: ./gradlew --stacktrace --info --warning-mode=all clean assembleDebug
 
-      - name: Unit tests
+      - name: Run unit tests
         run: ./gradlew --stacktrace --info testDebugUnitTest
 
       - name: Upload APK
