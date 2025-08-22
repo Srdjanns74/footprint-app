@@ -15,12 +15,26 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // ▼▼▼ DODATO: placeholders i BuildConfig polja za ključeve ▼▼▼
+        // GOOGLE_MAPS_API_KEY će stići iz GitHub Secrets ili ~/.gradle/gradle.properties
+        manifestPlaceholders = [
+            GOOGLE_MAPS_API_KEY: System.getenv("GOOGLE_MAPS_API_KEY") ?: (project.findProperty("GOOGLE_MAPS_API_KEY") ?: "")
+        ]
+        // Ako koristiš Mapbox token u kodu: BuildConfig.MAPBOX_PUBLIC_TOKEN
+        buildConfigField "String", "MAPBOX_PUBLIC_TOKEN",
+                "\"${ System.getenv("MAPBOX_PUBLIC_TOKEN") ?: (project.findProperty("MAPBOX_PUBLIC_TOKEN") ?: "") }\""
+        // ▲▲▲ KRAJ dodatka ▲▲▲
     }
 
     buildTypes {
         release {
+            // može ostati false za sad (za Play Store ćemo kasnije)
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // može ostati prazan; služi samo za debug build
         }
     }
 
@@ -39,25 +53,9 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.13.1'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.24"
 
-    // Retrofit + GSON
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-
-    // Navigation (ako koristiš navigation components)
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.7.7'
-
-    // Lifecycle (ako koristiš ViewModel i LiveData)
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
-
-    // Test dependencies (po želji)
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    // Dodaj ovde svoje postojeće zavisnosti (maps, play-services-maps, itd) ako već nisi.
+    // primer:
+    // implementation "com.google.android.gms:play-services-maps:18.2.0"
 }
