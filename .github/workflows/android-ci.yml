@@ -10,14 +10,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     env:
-      # Ako koristiš API ključeve (Mapbox/Google), stavi ih u GitHub Secrets i mapiraj ovde:
+      # Ako ih koristiš, dodaćemo ih kao Secrets u Settings → Secrets → Actions
+      GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
       MAPBOX_PUBLIC_TOKEN: ${{ secrets.MAPBOX_PUBLIC_TOKEN }}
       MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
-      GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
-      # Pomoćne promenljive
       JAVA_TOOL_OPTIONS: -Xmx2g
       GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2g -Dfile.encoding=UTF-8"
 
@@ -35,29 +33,24 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          # Prilagodi prema projektu (API 34 je tipično ok)
           api-level: 34
           build-tools: "34.0.0"
-          ndk: ""
-          cmake: ""
 
       - name: Ensure Gradlew is executable
         run: chmod +x ./gradlew
 
-      # Ako build/plugini ili tvoj kod očekuju local.properties (čak i kada nije neophodno),
-      # napravi ga ovde i veži na ANDROID_SDK_ROOT koji postavlja setup-android.
+      # rešava "SDK location not found" bez komitovanja local.properties
       - name: Create local.properties (sdk.dir)
-        run: |
-          echo "sdk.dir=${ANDROID_SDK_ROOT}" > local.properties
+        run: echo "sdk.dir=${ANDROID_SDK_ROOT}" > local.properties
 
-      # Ako želiš da ubaciš API ključeve u gradle.properties (preporučeno):
+      # ubaci Secrets u ~/.gradle/gradle.properties da ih Gradle vidi kao project properties
       - name: Inject secrets into Gradle properties
         run: |
           mkdir -p ~/.gradle
           {
+            echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}"
             echo "MAPBOX_PUBLIC_TOKEN=${MAPBOX_PUBLIC_TOKEN}"
             echo "MAPBOX_DOWNLOADS_TOKEN=${MAPBOX_DOWNLOADS_TOKEN}"
-            echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}"
           } >> ~/.gradle/gradle.properties
 
       - name: Dependencies
@@ -66,10 +59,9 @@ jobs:
       - name: Build Debug
         run: ./gradlew --stacktrace --info --warning-mode=all clean assembleDebug
 
-      - name: Run unit tests
+      - name: Unit tests
         run: ./gradlew --stacktrace --info testDebugUnitTest
 
-      # Upload APK artefakt da ga odmah možeš skinuti
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
